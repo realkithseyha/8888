@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>50/30/20 Budget Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Define a professional bank color palette and consistent spacing (Crypto Express Style) */
+        :root {
+            --primary: #004D7A; 
+            --primary-light: #0077B6;
+            --secondary: #50C878; 
+            --dark: #1A232F; 
+            --light: #F0F4F7; 
+            --background: #FFFFFF; 
+            --border-color: #DDE1E6; 
+            --text-muted: #5A6A78; 
+            --danger: #d9534f;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-medium: rgba(0, 0, 0, 0.12);
+        }
+
+        /* Base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--dark);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px var(--shadow-medium);
+        }
+
+        header {
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            text-align: center;
+            border-bottom: 5px solid var(--secondary);
+            display: block;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .calculator {
+            padding: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .explainer-text {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .explainer-text ul {
+            margin-top: 8px;
+            margin-left: 20px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 35px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1.05rem;
+            transition: all 0.2s ease-in-out;
+            background: white;
+            color: var(--dark);
+            font-family: 'Inter', sans-serif;
+            box-shadow: inset 0 1px 3px var(--shadow-light);
+            font-weight: 600;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fcfdff;
+        }
+
+        .input-wrapper .currency {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Budget Section & Tables */
+        .budget-section {
+            margin-bottom: 40px;
+        }
+
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .budget-header h3 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .budget-target {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--light);
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .budget-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .budget-table th {
+            text-align: left;
+            padding: 12px;
+            background-color: var(--light);
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .budget-table td {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .budget-input {
+            width: 100%;
+            border: 1px solid transparent;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: var(--dark);
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .budget-input:hover {
+            background-color: var(--light);
+        }
+
+        .budget-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fcfdff;
+        }
+
+        .total-row td {
+            background-color: var(--light);
+            font-weight: 600;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            background: transparent;
+            color: var(--primary);
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .action-btn:hover {
+            background: var(--light);
+        }
+
+        .delete-btn {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        /* Primary Buttons */
+        .primary-btn {
+            padding: 16px 32px;
+            font-size: 17px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            user-select: none;
+            width: 100%;
+            margin-top: 25px;
+            box-shadow: 0 2px 8px var(--shadow-light);
+            border: none;
+            background: var(--primary);
+            color: white;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-medium);
+            background-color: var(--primary-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { margin: 0; border-radius: 0; box-shadow: none; }
+            .calculator { padding: 20px; }
+            .budget-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+        }
+
+        /* Print Styles */
+        @media print {
+            * { color: #000 !important; }
+            .no-print, .primary-btn { display: none !important; }
+            body { background: white; padding: 0; font-size: 10pt; }
+            .container { box-shadow: none; border-radius: 0; margin: 0; }
+            .calculator { padding: 10px; border-bottom: none; }
+            .explainer-text { display: none; }
+            .budget-input, .input-wrapper input {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                pointer-events: none;
+                box-shadow: none !important;
+            }
+            .action-col { display: none !important; }
+            .budget-table th { 
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #f0f4f7 !important; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>50/30/20 Budget Planner</h1>
+            <div class="subtitle">Professional Financial Distribution Tool</div>
+        </header>
+
+        <div class="calculator">
+            
+            <div class="explainer-text no-print">
+                <p><strong>The 50/30/20 Rule:</strong> Your after-tax income is divided into three main categories:</p>
+                <ul>
+                    <li><strong>50% Needs:</strong> Essentials like rent, groceries, and bills.</li>
+                    <li><strong>30% Wants:</strong> Lifestyle choices like dining, shopping, and entertainment.</li>
+                    <li><strong>20% Savings:</strong> Emergency funds, investments, and debt repayment.</li>
+                </ul>
+            </div>
+
+            <div class="form-group">
+                <label for="income-input">Monthly Income (After Tax)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="income-input" placeholder="0.00">
+                    <span class="currency">USD</span>
+                </div>
+            </div>
+
+            <div id="needs-container"></div>
+            <div id="wants-container"></div>
+            <div id="savings-container"></div>
+
+            <button class="primary-btn no-print" onclick="window.print()">Print Budget Report</button>
+        </div>
+    </div>
+
+    <script>
+        const app = {
+            state: {
+                income: '',
+                needs: [
+                    { id: 'n1', name: 'Rent', amount: '' },
+                    { id: 'n2', name: 'Utilities', amount: '' },
+                    { id: 'n3', name: 'Groceries', amount: '' },
+                    { id: 'n4', name: 'Transportation', amount: '' }
+                ],
+                wants: [
+                    { id: 'w1', name: 'Eating out / Coffee', amount: '' },
+                    { id: 'w2', name: 'Entertainment / Hobbies', amount: '' },
+                    { id: 'w3', name: 'Shopping / Clothes', amount: '' }
+                ],
+                savings: [
+                    { id: 's1', name: 'Emergency Fund', amount: '' },
+                    { id: 's2', name: 'Investments / Retirement', amount: '' },
+                    { id: 's3', name: 'Extra Loan Repayment', amount: '' }
+                ]
+            },
+
+            formatMoney: (amount) => {
+                return '$' + parseFloat(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            },
+
+            generateId: () => {
+                return Date.now().toString(36) + Math.random().toString(36).substring(2);
+            },
+
+            renderTableHTML: (categoryKey, categoryTitle, percentage, targetAmount, items, totalAmount) => {
+                const isOverBudget = totalAmount > targetAmount;
+                let rowsHtml = items.map(item => `
+                    <tr>
+                        <td style="width: 60%;">
+                            <input type="text" class="budget-input item-name" data-category="${categoryKey}" data-id="${item.id}" value="${item.name}" placeholder="Item Description">
+                        </td>
+                        <td style="width: 35%;">
+                            <input type="number" class="budget-input item-amount" data-category="${categoryKey}" data-id="${item.id}" value="${item.amount || ''}" placeholder="0.00" min="0" step="any">
+                        </td>
+                        <td class="action-col no-print" style="text-align: center; width: 5%;">
+                            <button class="action-btn delete-btn" data-category="${categoryKey}" data-id="${item.id}" title="Delete Row">✕</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                return `
+                    <div class="budget-section">
+                        <div class="budget-header">
+                            <h3>${categoryTitle} (${percentage}%)</h3>
+                            <div class="budget-target">Target: ${app.formatMoney(targetAmount)}</div>
+                        </div>
+                        <table class="budget-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th colspan="2">Amount (USD)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                                <!-- Total Row -->
+                                <tr class="total-row">
+                                    <td>Total ${categoryTitle}</td>
+                                    <td colspan="2">
+                                        <span style="color: ${isOverBudget ? 'var(--danger)' : 'var(--dark)'};">
+                                            ${app.formatMoney(totalAmount)}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="action-col no-print" style="text-align: right; margin-top: 10px;">
+                             <button class="action-btn add-btn" data-category="${categoryKey}">+ Add ${categoryTitle} Item</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            render: () => {
+                const income = parseFloat(app.state.income) || 0;
+                
+                const incomeInput = document.getElementById('income-input');
+                if(incomeInput.value != app.state.income) incomeInput.value = app.state.income;
+
+                const targets = {
+                    needs: income * 0.5,
+                    wants: income * 0.3,
+                    savings: income * 0.2
+                };
+
+                const calcTotal = (items) => items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+                
+                const actuals = {
+                    needs: calcTotal(app.state.needs),
+                    wants: calcTotal(app.state.wants),
+                    savings: calcTotal(app.state.savings)
+                };
+
+                document.getElementById('needs-container').innerHTML = app.renderTableHTML('needs', 'Needs', 50, targets.needs, app.state.needs, actuals.needs);
+                document.getElementById('wants-container').innerHTML = app.renderTableHTML('wants', 'Wants', 30, targets.wants, app.state.wants, actuals.wants);
+                document.getElementById('savings-container').innerHTML = app.renderTableHTML('savings', 'Savings', 20, targets.savings, app.state.savings, actuals.savings);
+            },
+
+            initEventListeners: () => {
+                document.getElementById('income-input').addEventListener('input', (e) => {
+                    app.state.income = e.target.value;
+                    app.render(); 
+                });
+
+                document.addEventListener('change', (e) => {
+                    if (e.target.matches('.item-name')) {
+                        const id = e.target.dataset.id;
+                        const category = e.target.dataset.category;
+                        const item = app.state[category].find(i => i.id === id);
+                        if (item) item.name = e.target.value;
+                    }
+                    
+                    if (e.target.matches('.item-amount')) {
+                        const id = e.target.dataset.id;
+                        const category = e.target.dataset.category;
+                        const item = app.state[category].find(i => i.id === id);
+                        if (item) {
+                            item.amount = e.target.value === '' ? '' : parseFloat(e.target.value);
+                            app.render(); 
+                        }
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    const deleteBtn = e.target.closest('.delete-btn');
+                    if (deleteBtn) {
+                        const id = deleteBtn.dataset.id;
+                        const category = deleteBtn.dataset.category;
+                        app.state[category] = app.state[category].filter(i => i.id !== id);
+                        app.render();
+                    }
+
+                    const addBtn = e.target.closest('.add-btn');
+                    if (addBtn) {
+                        const category = addBtn.dataset.category;
+                        app.state[category].push({ id: app.generateId(), name: '', amount: '' });
+                        app.render();
+                        
+                        setTimeout(() => {
+                            const inputs = document.querySelectorAll(`input[data-category="${category}"].item-name`);
+                            if(inputs.length > 0) inputs[inputs.length - 1].focus();
+                        }, 50);
+                    }
+                });
+            },
+
+            init: () => {
+                app.initEventListeners();
+                app.render();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', app.init);
+
+    </script>
+</body>
+</html>
