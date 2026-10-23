@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>KITH TOOLS - 50/30/20 Budget Planner (Tactile Edition)</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+  <!-- Lenis Smooth Scrolling Library -->
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      outline: none;
+    }
+
+    :root {
+      /* Tactile Neo-Brutalist Color System (From KITH TOOLS) */
+      --bg:           #F7F6F2;
+      --card:         #FFFFFF;
+      --well:         #F2F0EA;
+      --ink:          #18181B;
+      --muted:        #71717A;
+      --muted-light:  #A1A1AA;
+
+      /* Accent & Category Colors */
+      --yellow:       #F3C644;
+      --coral:        #F0645A;
+      --mint:         #3CD085;
+      --brown:        #AF6E44;
+      --charcoal:     #1E1E22;
+      --danger:       #DC2626;
+
+      --needs:        #F0645A;
+      --wants:        #AF6E44;
+      --save:         #3CD085;
+
+      /* Borders & Hard Shadows */
+      --border:       2px solid #18181B;
+      --border-thin:  1.5px solid #18181B;
+      --shadow-lg:    0 4px 0 #18181B;
+      --shadow-md:    0 3px 0 #18181B;
+      --shadow-sm:    0 2px 0 #18181B;
+
+      --ease-spring:  cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* LENIS SCROLL CSS */
+    html.lenis, html.lenis body { height: auto; }
+    .lenis.lenis-smooth { scroll-behavior: auto !important; }
+    .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+    .lenis.lenis-stopped { overflow: hidden; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+      overflow-x: hidden;
+      padding-bottom: 60px;
+    }
+
+    ::-webkit-scrollbar { width: 0; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+
+    .num, .fig {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ══ SCROLL REVEAL ANIMATIONS ══ */
+    .reveal-item {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.65s var(--ease-spring), transform 0.65s var(--ease-spring);
+      will-change: opacity, transform;
+    }
+    .reveal-item.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ══ MAIN CONTAINER ══ */
+    .app-shell {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 20px 18px;
+    }
+
+    /* ══ TOP APP BAR & HERO (Matches KITH TOOLS) ══ */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sq-icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      text-decoration: none;
+    }
+
+    .sq-icon-btn:hover {
+      background: var(--well);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .sq-icon-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 0 0 var(--ink);
+    }
+
+    .hero-headline {
+      font-size: clamp(34px, 7vw, 48px);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    /* Quick Action Bar */
+    .quick-bar-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .quick-input-box {
+      flex: 1;
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow-md);
+      border-radius: 14px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 54px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .quick-input-box:hover {
+      transform: translateY(-1px);
+    }
+
+    .quick-input-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .quick-input-hash {
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .quick-plus-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-md);
+      color: var(--ink);
+      font-size: 26px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .quick-plus-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .quick-plus-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 0 0 var(--ink);
+    }
+
+    /* Notification Banner */
+    .notif-banner {
+      background: var(--card);
+      border: var(--border);
+      box-shadow: var(--shadow-md);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .notif-banner:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .notif-banner:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--ink);
+    }
+
+    .notif-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .icon-tile {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--ink);
+    }
+
+    .tile-mint     { background: var(--mint); }
+    .tile-coral    { background: var(--coral); }
+    .tile-yellow   { background: var(--yellow); }
+    .tile-brown    { background: var(--brown); }
+    .tile-charcoal { background: var(--charcoal); color: #FFFFFF; }
+
+    .notif-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .notif-sub {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ══ SECTION HEADINGS ══ */
+    .section-heading {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ══ FOLDER CONTAINER SYSTEM (Matches KITH TOOLS) ══ */
+    .folder-wrap {
+      position: relative;
+      padding-top: 13px;
+      margin-bottom: 24px;
+    }
+
+    .folder-tab {
+      position: absolute;
+      top: 0;
+      left: 12px;
+      width: 96px;
+      height: 16px;
+      border: var(--border);
+      border-bottom: none;
+      border-radius: 9px 9px 0 0;
+      z-index: 1;
+    }
+
+    .folder-tab.coral, .folder-tab.needs     { background: var(--coral); }
+    .folder-tab.brown, .folder-tab.wants     { background: var(--brown); }
+    .folder-tab.charcoal                     { background: var(--charcoal); }
+    .folder-tab.yellow                       { background: var(--yellow); }
+    .folder-tab.mint, .folder-tab.savings    { background: var(--mint); }
+
+    .folder-card {
+      position: relative;
+      z-index: 2;
+      background: var(--card);
+      border: var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      padding: 20px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Yellow Pill Badge */
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--yellow);
+      color: var(--ink);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1.5px solid var(--ink);
+      white-space: nowrap;
+    }
+
+    .pill-badge.coral {
+      background: var(--coral);
+      color: #FFFFFF;
+    }
+
+    .pill-badge.mint {
+      background: var(--mint);
+      color: var(--ink);
+    }
+
+    /* ══ STATS 2x2 FOLDER GRID (From KITH TOOLS) ══ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .stat-folder-wrap {
+      position: relative;
+      padding-top: 12px;
+    }
+
+    .stat-folder-wrap .folder-tab {
+      width: 78px;
+      height: 14px;
+      left: 10px;
+    }
+
+    .stat-card {
+      position: relative;
+      z-index: 2;
+      background: var(--card);
+      border: var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 124px;
+      transition: transform 0.15s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-meta-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .stat-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-lbl {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .stat-val {
+      font-size: clamp(20px, 4vw, 26px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--ink);
+    }
+
+    .stat-val.gv { color: #15803D; }
+    .stat-val.rv { color: #DC2626; }
+
+    /* ══ CARD HEADERS (Matches KITH TOOLS) ══ */
+    .calc-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .calc-section-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .calc-section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .calc-section-sub {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    /* ══ INCOME & AMOUNT INPUTS ══ */
+    .income-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .amt {
+      display: flex;
+      align-items: stretch;
+      border: var(--border);
+      border-radius: 12px;
+      background: var(--well);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .amt:focus-within {
+      background: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .amt .sign {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      background: var(--yellow);
+      border-right: var(--border);
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .amt input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      text-align: right;
+      padding: 10px 12px;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .amt input::placeholder {
+      color: var(--muted-light);
+      font-weight: 600;
+    }
+
+    .amt.lg {
+      width: 270px;
+    }
+    .amt.lg .sign {
+      font-size: 1.15rem;
+      padding: 0 16px;
+    }
+    .amt.lg input {
+      font-size: 1.35rem;
+      font-weight: 800;
+      padding: 12px 16px;
+    }
+
+    /* ══ ALLOCATION BAR & LEGEND ══ */
+    .bar {
+      display: flex;
+      gap: 6px;
+      height: 44px;
+    }
+
+    .seg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .seg:first-child { flex: 50; background: var(--needs); color: #FFFFFF; }
+    .seg:nth-child(2) { flex: 30; background: var(--wants); color: #FFFFFF; }
+    .seg:nth-child(3) { flex: 20; background: var(--save); color: var(--ink); }
+
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .legend-card {
+      background: var(--well);
+      border: var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .legend b {
+      display: flex;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .legend .fig {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .legend .sub {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      border: 1.5px solid var(--ink);
+      margin-right: 8px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: var(--border);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .summary strong {
+      color: var(--ink);
+      font-weight: 800;
+      margin-left: 8px;
+    }
+
+    /* ══ CATEGORY FOLDERS & LINE ITEMS ══ */
+    .target {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .target strong {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .meter {
+      height: 14px;
+      background: var(--well);
+      border: var(--border);
+      border-radius: 99px;
+      margin: 14px 0 8px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0;
+      border-right: 2px solid var(--ink);
+      transition: width 0.25s ease;
+    }
+
+    .status {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .status.over {
+      color: var(--danger);
+      font-weight: 800;
+    }
+
+    .rows {
+      border-top: var(--border);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 190px 40px;
+      gap: 12px;
+      align-items: center;
+      padding: 11px 0;
+      border-bottom: 1.5px solid rgba(24, 24, 27, 0.14);
+    }
+
+    .row .name {
+      border: var(--border);
+      background: var(--well);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 14px;
+      outline: none;
+      min-width: 0;
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .row .name:focus {
+      background: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .row .name::placeholder {
+      color: var(--muted-light);
+      font-weight: 600;
+    }
+
+    .del {
+      border: var(--border);
+      background: var(--coral);
+      color: #FFFFFF;
+      font-size: 1.15rem;
+      font-weight: 800;
+      cursor: pointer;
+      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .del:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .del:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      gap: 12px;
+    }
+
+    .add {
+      font: inherit;
+      font-weight: 800;
+      font-size: 13px;
+      background: var(--yellow);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      color: var(--ink);
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .add:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .add:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    .tot {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+    }
+
+    .tot .lbl {
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tot .amt {
+      pointer-events: none;
+      background: var(--well);
+    }
+
+    .tot .amt .v {
+      padding: 9px 14px;
+      min-width: 130px;
+      text-align: right;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .tot.over .v {
+      color: var(--danger);
+    }
+
+    /* ══ SUPPORT SECTION (From KITH TOOLS) ══ */
+    .support-card-body {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .account-block {
+      background: var(--well);
+      border: var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .account-header {
+      padding: 10px 16px;
+      background: var(--charcoal);
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .account-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .account-row:hover {
+      background: #E7E4DC;
+    }
+
+    .account-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .account-num-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .account-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: 0.03em;
+    }
+
+    .copy-pill {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: var(--card);
+      border: 1.5px solid var(--ink);
+      color: var(--ink);
+    }
+
+    .account-divider {
+      height: 1.5px;
+      background: var(--ink);
+      opacity: 0.12;
+      margin: 0 16px;
+    }
+
+    .support-thanks {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      .amt.lg { width: 100%; }
+      .seg { padding: 0 8px; font-size: 0.8rem; }
+      .legend { grid-template-columns: 1fr; gap: 12px; }
+      .row { grid-template-columns: 1fr 135px 38px; gap: 8px; }
+      .foot { flex-direction: column-reverse; align-items: stretch; }
+      .tot { justify-content: space-between; }
+    }
+
+    /* ══ STRICT BLACK & WHITE PRINT RULES ══ */
+    @media print {
+      @page { margin: 14mm; }
+      :root { --bg: #fff; --card: #fff; --ink: #000; --muted: #000; --well: #fff; }
+      * {
+        color: #000 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      body { padding: 0 !important; font-size: 10pt; }
+      .no-print, .top-bar, .quick-bar-row, .notif-banner, .folder-tab, .icon-tile, svg, .add, .del, .dot {
+        display: none !important;
+      }
+      .folder-wrap, .stat-folder-wrap {
+        padding-top: 0 !important;
+        margin-bottom: 14px !important;
+      }
+      .folder-card, .stat-card {
+        border: 1px solid #000 !important;
+        page-break-inside: avoid;
+      }
+      .seg { border: 1px solid #000 !important; height: 34px; }
+      .row { grid-template-columns: 1fr 150px; border-bottom: 1px solid #000 !important; }
+      .rows { border-top: 1px solid #000 !important; }
+      .row .name { border: none !important; padding: 4px 0 !important; }
+      .row .name::placeholder, .amt input::placeholder { color: transparent !important; }
+      .meter { border: 1px solid #000 !important; height: 10px; }
+      .fill { background: #000 !important; }
+      .amt, .tot .amt, .legend-card { border: 1px solid #000 !important; }
+      .amt .sign { border-right: 1px solid #000 !important; }
+      .amt.lg { width: 220px; }
+      .legend .sub, .status { color: #000 !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- TOP NAVIGATION BAR (Matches KITH TOOLS) -->
+    <header class="top-bar reveal-item no-print">
+      <a href="#support-section" class="sq-icon-btn" title="Support & Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </a>
+      <div class="top-bar-right">
+        <a href="#cats" class="sq-icon-btn" title="Budget Categories">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+        </a>
+        <button type="button" class="sq-icon-btn" onclick="window.print()" title="Print Budget Report">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- HERO SECTION (Matches KITH TOOLS) -->
+    <section class="reveal-item">
+      <h1 class="hero-headline">Plan smart.<br>Save anytime.</h1>
+      <div class="hero-subtitle">50/30/20 Budget Planner · Split your monthly after-tax income into needs, wants, and savings</div>
+
+      <!-- Quick Action Bar -->
+      <div class="quick-bar-row no-print">
+        <div class="quick-input-box" onclick="focusIncome()">
+          <div class="quick-input-left">
+            <span class="quick-input-hash">#</span>
+            <span id="quick-income-prompt">Tap to set your monthly after-tax income...</span>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+          </svg>
+        </div>
+        <button type="button" class="quick-plus-btn" onclick="focusIncome()" title="Set Monthly Income">+</button>
+      </div>
+
+      <!-- Notification Status Banner -->
+      <div class="notif-banner no-print" onclick="document.getElementById('cats').scrollIntoView({behavior:'smooth'})">
+        <div class="notif-left">
+          <div class="icon-tile tile-mint">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="notif-title" id="banner-headline">50% Needs · 30% Wants · 20% Savings</div>
+            <div class="notif-sub" id="banner-sub">Enter your monthly income below to calculate folder targets</div>
+          </div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 2x2 FOLDER STATS GRID (Directly from KITH TOOLS "My Collections" layout) -->
+    <section class="reveal-item">
+      <div class="section-heading">
+        <span>Budget Collections</span>
+        <span class="pill-badge">50 / 30 / 20</span>
+      </div>
+      <div class="stats-grid" id="budget-stats-grid"></div>
+    </section>
+
+    <!-- FOLDER 1: MONTHLY INCOME BAR (Yellow Tab) -->
+    <div id="income-section" class="folder-wrap reveal-item">
+      <div class="folder-tab yellow"></div>
+      <section class="folder-card">
+        <div class="income-row">
+          <div class="calc-section-header-left">
+            <div class="icon-tile tile-yellow">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div>
+              <label for="income" class="calc-section-title">
+                <span>Monthly Income</span>
+                <span class="pill-badge">AFTER TAX</span>
+              </label>
+              <div class="calc-section-sub">Enter your net take-home pay in US dollars</div>
+            </div>
+          </div>
+          <div class="amt lg">
+            <span class="sign">$</span>
+            <input id="income" type="number" min="0" step="any" placeholder="0.00" inputmode="decimal">
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- FOLDER 2: ALLOCATION OVERVIEW (Charcoal Tab) -->
+    <div class="folder-wrap reveal-item">
+      <div class="folder-tab charcoal"></div>
+      <section class="folder-card" aria-label="Allocation">
+        <div class="calc-section-header">
+          <div class="calc-section-header-left">
+            <div class="icon-tile tile-charcoal">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="3" y1="9" x2="21" y2="9"></line>
+                <line x1="9" y1="21" x2="9" y2="9"></line>
+              </svg>
+            </div>
+            <div>
+              <div class="calc-section-title">Allocation Breakdown</div>
+              <div class="calc-section-sub">Target distribution across your three core buckets</div>
+            </div>
+          </div>
+          <span class="pill-badge">TARGETS</span>
+        </div>
+
+        <div class="bar">
+          <div class="seg">50%</div>
+          <div class="seg">30%</div>
+          <div class="seg">20%</div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-card">
+            <b><span class="dot" style="background:var(--needs)"></span>Needs (50%)</b>
+            <div class="fig" data-t="needs">$0.00</div>
+            <div class="sub">Rent, groceries, bills</div>
+          </div>
+          <div class="legend-card">
+            <b><span class="dot" style="background:var(--wants)"></span>Wants (30%)</b>
+            <div class="fig" data-t="wants">$0.00</div>
+            <div class="sub">Dining, shopping, fun</div>
+          </div>
+          <div class="legend-card">
+            <b><span class="dot" style="background:var(--save)"></span>Savings (20%)</b>
+            <div class="fig" data-t="savings">$0.00</div>
+            <div class="sub">Emergency, debt, investing</div>
+          </div>
+        </div>
+
+        <div class="summary">
+          <span>Planned <strong class="fig" id="planned">$0.00</strong></span>
+          <span>Left to assign <strong class="fig" id="left">$0.00</strong></span>
+        </div>
+      </section>
+    </div>
+
+    <!-- DYNAMIC CATEGORY FOLDERS -->
+    <section id="cats" class="reveal-item"></section>
+
+    <!-- SUPPORT THE PROJECT SECTION (Copied Smoothly from KITH TOOLS) -->
+    <section id="support-section" class="reveal-item no-print" style="margin-top: 32px;">
+      <div class="section-heading">
+        <span>Support the Project</span>
+        <span class="pill-badge mint">FREE TOOLS</span>
+      </div>
+
+      <div class="folder-wrap">
+        <div class="folder-tab mint"></div>
+        <div class="folder-card">
+          <div class="calc-section-header">
+            <div class="calc-section-header-left">
+              <div class="icon-tile tile-yellow">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                  <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                  <line x1="6" y1="1" x2="6" y2="4"></line>
+                  <line x1="10" y1="1" x2="10" y2="4"></line>
+                  <line x1="14" y1="1" x2="14" y2="4"></line>
+                </svg>
+              </div>
+              <div>
+                <div class="calc-section-title">Buy me a coffee</div>
+                <div class="calc-section-sub">Fuel the next KITH TOOLS update</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-card-body">
+            Building and maintaining these tools takes late nights and a lot of caffeine.
+            If this website has helped your financial planning journey, consider fueling the next update.
+            Your support helps cover server costs and keeps these tools free for everyone.
+          </div>
+
+          <div class="account-block">
+            <div class="account-header">
+              <span>ABA BANK</span>
+              <span style="opacity:0.75;font-size:10px">TAP TO COPY</span>
+            </div>
+            <div class="account-row" onclick="copyAcc('500 717 935', 'khr-copy')">
+              <span class="account-label">KHR Account</span>
+              <div class="account-num-wrap">
+                <span class="account-num">500 717 935</span>
+                <span class="copy-pill" id="khr-copy">COPY</span>
+              </div>
+            </div>
+            <div class="account-divider"></div>
+            <div class="account-row" onclick="copyAcc('003 678 734', 'usd-copy')">
+              <span class="account-label">USD Account</span>
+              <div class="account-num-wrap">
+                <span class="account-num">003 678 734</span>
+                <span class="copy-pill" id="usd-copy">COPY</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-thanks">
+            Thank you to all my friends for the incredible support!
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    /* ═══════════════
+       LENIS SMOOTH SCROLL & REVEAL OBSERVER (From KITH TOOLS)
+    ═══════════════ */
+    const lenis = new Lenis({
+      duration: 1.1,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.06, rootMargin: '0px 0px -20px 0px' });
+
+    document.querySelectorAll('.reveal-item').forEach((el, index) => {
+      el.style.transitionDelay = `${Math.min(index * 50, 200)}ms`;
+      revealObserver.observe(el);
+    });
+
+    /* ═══════════════
+       COPY ACCOUNT HELPER (From KITH TOOLS)
+    ═══════════════ */
+    function copyAcc(num, badgeId) {
+      const clean = num.replace(/\s+/g, '');
+      const temp = document.createElement('textarea');
+      temp.value = clean;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+
+      const badge = document.getElementById(badgeId);
+      if (badge) {
+        const orig = badge.textContent;
+        badge.textContent = 'COPIED!';
+        badge.style.background = '#3CD085';
+        setTimeout(() => {
+          badge.textContent = orig;
+          badge.style.background = '';
+        }, 1600);
+      }
+    }
+
+    function focusIncome() {
+      const el = document.getElementById('income');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => el.focus(), 250);
+      }
+    }
+
+    /* ═══════════════
+       50/30/20 BUDGET PLANNER ENGINE + 2x2 STATS GRID
+    ═══════════════ */
+    const cats = [
+      {
+        k: 'needs',
+        t: 'Needs',
+        sub: 'Essential living costs & obligations',
+        p: 50,
+        c: '--needs',
+        tile: 'tile-coral',
+        icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`
+      },
+      {
+        k: 'wants',
+        t: 'Wants',
+        sub: 'Lifestyle, dining out & leisure',
+        p: 30,
+        c: '--wants',
+        tile: 'tile-brown',
+        icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`
+      },
+      {
+        k: 'savings',
+        t: 'Savings',
+        sub: 'Emergency reserves, investments & debt payoff',
+        p: 20,
+        c: '--save',
+        tile: 'tile-mint',
+        icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>`
+      }
+    ];
+
+    const S = {
+      income: 0,
+      needs: [['Rent'], ['Utilities'], ['Groceries'], ['Transportation']],
+      wants: [['Dining out and coffee'], ['Entertainment and hobbies'], ['Shopping']],
+      savings: [['Emergency fund'], ['Investments and retirement'], ['Extra loan repayment']]
+    };
+
+    let uid = 0;
+    for (const c of cats) {
+      S[c.k] = S[c.k].map(r => ({ id: ++uid, name: r[0], amount: 0 }));
+    }
+
+    const $ = s => document.querySelector(s);
+    const fmt = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const esc = s => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const sum = k => S[k].reduce((a, r) => a + (r.amount || 0), 0);
+
+    function renderBudgetStats(inc, needsTotal, wantsTotal, savingsTotal, left) {
+      const grid = document.getElementById('budget-stats-grid');
+      if (!grid) return;
+
+      const needsTarget = inc * 0.50;
+      const wantsTarget = inc * 0.30;
+      const savingsTarget = inc * 0.20;
+
+      grid.innerHTML = `
+        <!-- Card 1: Coral Tab (Needs 50%) -->
+        <div class="stat-folder-wrap">
+          <div class="folder-tab coral"></div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="icon-tile tile-coral">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+              </div>
+              <div class="stat-meta-group">
+                <span class="stat-sub">of ${fmt(needsTarget)}</span>
+                <span class="pill-badge">50% NEEDS</span>
+              </div>
+            </div>
+            <div class="stat-bottom">
+              <div class="stat-lbl">Needs Planned</div>
+              <div class="stat-val ${needsTotal > needsTarget && inc > 0 ? 'rv' : ''}">${fmt(needsTotal)}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Brown Tab (Wants 30%) -->
+        <div class="stat-folder-wrap">
+          <div class="folder-tab brown"></div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="icon-tile tile-brown">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div class="stat-meta-group">
+                <span class="stat-sub">of ${fmt(wantsTarget)}</span>
+                <span class="pill-badge">30% WANTS</span>
+              </div>
+            </div>
+            <div class="stat-bottom">
+              <div class="stat-lbl">Wants Planned</div>
+              <div class="stat-val ${wantsTotal > wantsTarget && inc > 0 ? 'rv' : ''}">${fmt(wantsTotal)}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Charcoal Tab (Savings 20%) -->
+        <div class="stat-folder-wrap">
+          <div class="folder-tab charcoal"></div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="icon-tile tile-charcoal">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+              <div class="stat-meta-group">
+                <span class="stat-sub">of ${fmt(savingsTarget)}</span>
+                <span class="pill-badge">20% SAVE</span>
+              </div>
+            </div>
+            <div class="stat-bottom">
+              <div class="stat-lbl">Savings Planned</div>
+              <div class="stat-val gv">${fmt(savingsTotal)}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4: Yellow Tab (Unassigned / Balance) -->
+        <div class="stat-folder-wrap">
+          <div class="folder-tab yellow"></div>
+          <div class="stat-card">
+            <div class="stat-card-top">
+              <div class="icon-tile tile-yellow">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+              </div>
+              <div class="stat-meta-group">
+                <span class="stat-sub">Net</span>
+                <span class="pill-badge">${left < -0.005 ? 'OVER' : 'LEFT'}</span>
+              </div>
+            </div>
+            <div class="stat-bottom">
+              <div class="stat-lbl">Left to Assign</div>
+              <div class="stat-val ${left < -0.005 ? 'rv' : 'gv'}">${left < 0 ? '-' + fmt(-left) : fmt(left)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      $('#cats').innerHTML = cats.map(c => `
+        <div class="folder-wrap">
+          <div class="folder-tab ${c.k}"></div>
+          <section class="folder-card" data-k="${c.k}">
+            <div class="calc-section-header" style="margin-bottom: 12px;">
+              <div class="calc-section-header-left">
+                <div class="icon-tile ${c.tile}">${c.icon}</div>
+                <div>
+                  <h2 class="calc-section-title">${c.t} <span class="pill-badge">${c.p}%</span></h2>
+                  <div class="calc-section-sub">${c.sub}</div>
+                </div>
+              </div>
+              <div class="target">Target <strong class="fig" data-tt="${c.k}"></strong></div>
+            </div>
+            <div class="meter"><div class="fill" data-f="${c.k}" style="background:var(${c.c})"></div></div>
+            <div class="status" data-s="${c.k}"></div>
+            <div class="rows">${S[c.k].map(r => `
+              <div class="row">
+                <input class="name" data-k="${c.k}" data-id="${r.id}" value="${esc(r.name)}" placeholder="Description" aria-label="Description">
+                <div class="amt"><span class="sign">$</span><input class="num" type="number" min="0" step="any" inputmode="decimal" placeholder="0.00" data-k="${c.k}" data-id="${r.id}" value="${r.amount || ''}" aria-label="Amount"></div>
+                <button class="del" data-k="${c.k}" data-id="${r.id}" aria-label="Remove row" title="Remove">&times;</button>
+              </div>`).join('')}
+            </div>
+            <div class="foot">
+              <button class="add" data-add="${c.k}">+ Add item</button>
+              <div class="tot" data-tot="${c.k}">
+                <span class="lbl">Total ${c.t.toLowerCase()}</span>
+                <div class="amt"><span class="sign">$</span><span class="v" data-v="${c.k}">0.00</span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      `).join('');
+      update();
+    }
+
+    function update() {
+      const inc = S.income || 0;
+      let planned = 0;
+
+      for (const c of cats) {
+        const target = inc * c.p / 100;
+        const total = sum(c.k);
+        const left = target - total;
+        planned += total;
+
+        document.querySelectorAll(`[data-t="${c.k}"],[data-tt="${c.k}"]`).forEach(e => e.textContent = fmt(target));
+        $(`[data-v="${c.k}"]`).textContent = fmt(total).slice(1);
+        $(`[data-f="${c.k}"]`).style.width = (target > 0 ? Math.min(100, total / target * 100) : 0) + '%';
+
+        const st = $(`[data-s="${c.k}"]`);
+        const over = left < -0.005;
+        st.className = 'status' + (over ? ' over' : '');
+        st.textContent = target <= 0 && total <= 0
+          ? 'Enter your income to see your target.'
+          : over
+            ? `${fmt(-left)} over target`
+            : `${fmt(left)} remaining`;
+        $(`[data-tot="${c.k}"]`).classList.toggle('over', over);
+      }
+
+      $('#planned').textContent = fmt(planned);
+      const l = inc - planned;
+      const el = $('#left');
+      el.textContent = l < 0 ? '-' + fmt(-l) : fmt(l);
+      el.style.color = l < -0.005 ? 'var(--danger)' : '';
+
+      const bh = $('#banner-headline');
+      const bs = $('#banner-sub');
+      const qp = $('#quick-income-prompt');
+
+      if (bh && bs) {
+        if (inc > 0) {
+          bh.textContent = `${fmt(planned)} planned of ${fmt(inc)} monthly income`;
+          bs.textContent = l >= 0
+            ? `${fmt(l)} left to assign across your folders`
+            : `${fmt(-l)} over your monthly income`;
+          if (qp) qp.textContent = `Monthly income set to ${fmt(inc)} · Tap to adjust`;
+        } else {
+          bh.textContent = '50% Needs · 30% Wants · 20% Savings';
+          bs.textContent = 'Enter your monthly income below to calculate folder targets';
+          if (qp) qp.textContent = 'Tap to set your monthly after-tax income...';
+        }
+      }
+
+      renderBudgetStats(inc, sum('needs'), sum('wants'), sum('savings'), l);
+    }
+
+    document.addEventListener('input', e => {
+      const t = e.target;
+      if (t.id === 'income') {
+        S.income = parseFloat(t.value) || 0;
+        update();
+        return;
+      }
+      if (!t.dataset.id) return;
+      const r = S[t.dataset.k].find(x => x.id == t.dataset.id);
+      if (!r) return;
+      if (t.classList.contains('name')) {
+        r.name = t.value;
+      } else {
+        r.amount = parseFloat(t.value) || 0;
+        update();
+      }
+    });
+
+    document.addEventListener('click', e => {
+      const d = e.target.closest('.del');
+      const a = e.target.closest('[data-add]');
+      if (d) {
+        S[d.dataset.k] = S[d.dataset.k].filter(x => x.id != d.dataset.id);
+        render();
+      }
+      if (a) {
+        const k = a.dataset.add;
+        S[k].push({ id: ++uid, name: '', amount: 0 });
+        render();
+        const n = document.querySelectorAll(`.name[data-k="${k}"]`);
+        n[n.length - 1].focus();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
